@@ -1,0 +1,41 @@
+name: Daily Amazon Sync
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: apps/backend
+
+      - name: Sync to database
+        env:
+          SELLING_PARTNER_APP_CLIENT_ID: ${{ secrets.SELLING_PARTNER_APP_CLIENT_ID }}
+          SELLING_PARTNER_APP_CLIENT_SECRET: ${{ secrets.SELLING_PARTNER_APP_CLIENT_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SELLING_PARTNER_ROLE: ${{ secrets.AWS_SELLING_PARTNER_ROLE }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          SYNC_HOURS_AGO: 24
+        run: node sync-to-db.mjs
+        working-directory: apps/backend
