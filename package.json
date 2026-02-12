@@ -1,6 +1,7 @@
 {
   "name": "next-forge",
   "version": "5.2.1",
+  "packageManager": "npm@10.9.2",
   "bin": {
     "next-forge": "dist/index.js"
   },

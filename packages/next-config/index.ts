@@ -1,7 +1,6 @@
 import withBundleAnalyzer from "@next/bundle-analyzer";
-import type { NextConfig } from "next";
 
-export const config: NextConfig = {
+export const config = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
@@ -34,5 +33,5 @@ export const config: NextConfig = {
   skipTrailingSlashRedirect: true,
 };
 
-export const withAnalyzer = (sourceConfig: NextConfig): NextConfig =>
+export const withAnalyzer = (sourceConfig: Record<string, unknown>) =>
   withBundleAnalyzer()(sourceConfig);

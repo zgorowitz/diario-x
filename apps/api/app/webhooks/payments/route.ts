@@ -1,7 +1,5 @@
 import { analytics } from "@repo/analytics/server";
 import { clerkClient } from "@repo/auth/server";
-import type { Stripe } from "@repo/payments";
-import { stripe } from "@repo/payments";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { env } from "@/env";
@@ -17,9 +15,7 @@ const getUserFromCustomerId = async (customerId: string) => {
   return user;
 };
 
-const handleCheckoutSessionCompleted = async (
-  data: Stripe.Checkout.Session
-) => {
+const handleCheckoutSessionCompleted = async (data: any) => {
   if (!data.customer) {
     return;
   }
@@ -38,9 +34,7 @@ const handleCheckoutSessionCompleted = async (
   });
 };
 
-const handleSubscriptionScheduleCanceled = async (
-  data: Stripe.SubscriptionSchedule
-) => {
+const handleSubscriptionScheduleCanceled = async (data: any) => {
   if (!data.customer) {
     return;
   }
@@ -65,6 +59,7 @@ export const POST = async (request: Request): Promise<Response> => {
   }
 
   try {
+    const { stripe } = await import("@repo/payments");
     const body = await request.text();
     const headerPayload = await headers();
     const signature = headerPayload.get("stripe-signature");

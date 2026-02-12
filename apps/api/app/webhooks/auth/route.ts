@@ -6,11 +6,19 @@ import type {
   UserJSON,
   WebhookEvent,
 } from "@repo/auth/server";
-import { log } from "@repo/observability/log";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { env } from "@/env";
+
+const log = {
+  error: (message: string, properties?: unknown) => {
+    console.error(message, properties);
+  },
+  info: (message: string, properties?: unknown) => {
+    console.info(message, properties);
+  },
+};
 
 const handleUserCreated = (data: UserJSON) => {
   analytics.identify({
