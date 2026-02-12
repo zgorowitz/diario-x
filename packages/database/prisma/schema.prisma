@@ -1,351 +1,99 @@
 generator client {
-  provider        = "prisma-client-js"
-  output          = "../generated/client"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
+  output   = "../generated/client"
 }
 
 datasource db {
-  provider     = "postgresql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model asin_keywords {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  asin_id       String?   @db.Uuid
-  keyword_id    String?   @db.Uuid
-  created_at    DateTime? @default(now()) @db.Timestamptz(6)
-  display_order Int?      @default(0)
+// Person - Core model for people in the network
+model Person {
+  id String @id @default(uuid())
 
-  @@unique([asin_id, keyword_id])
+  // Basic Identity
+  firstName String
+  lastName  String?
+  email     String?
+  phone     String?
+  photoUrl  String?
+
+  // Demographics
+  age      Int?
+  gender   String?
+  religion String?
+
+  // Location
+  city    String?
+  country String?
+
+  // Professional
+  occupation String?
+  company    String?
+
+  // Additional Info
+  notes String? @db.Text
+
+  // Metadata
+  addedBy   String
+  userId    String? // Clerk user ID if they join
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  connectionsFrom Connection[] @relation("FromPerson")
+  connectionsTo   Connection[] @relation("ToPerson")
+
+  @@index([firstName, lastName])
+  @@index([email])
+  @@index([userId])
+  @@index([city])
+  @@index([occupation])
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model asins {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  asin          String    @unique @db.VarChar(10)
-  product_name  String?
-  created_at    DateTime? @default(now()) @db.Timestamptz(6)
-  display_order Int?      @default(0)
+// Connection - Relationships between people
+model Connection {
+  id String @id @default(uuid())
+
+  fromPersonId String
+  toPersonId   String
+
+  // Relationship info
+  relationshipTypes String[] // Multiple types like ["friend", "colleague"]
+
+  // Context
+  howMet      String?
+  whenMetYear Int?
+
+  // Calculated strength
+  strengthScore Float?
+
+  // Metadata
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fromPerson Person @relation("FromPerson", fields: [fromPersonId], references: [id], onDelete: Cascade)
+  toPerson   Person @relation("ToPerson", fields: [toPersonId], references: [id], onDelete: Cascade)
+
+  @@unique([fromPersonId, toPersonId])
+  @@index([fromPersonId])
+  @@index([toPersonId])
 }
 
-model get_merchant_listings_all_data {
-  id                  Int       @id @default(autoincrement())
-  item_name           String?
-  item_description    String?
-  listing_id          String?
-  seller_sku          String?
-  asin1               String?
-  product_id          String?
-  product_id_type     String?
-  price               Decimal?  @db.Decimal(10, 2)
-  quantity            BigInt?
-  pending_quantity    BigInt?
-  status              String?
-  fulfillment_channel String?
-  item_is_marketplace Boolean?
-  image_url           String?
-  open_date           DateTime? @db.Timestamp(6)
-  created_at          DateTime? @default(now()) @db.Timestamp(6)
-  updated_at          DateTime? @default(now()) @db.Timestamp(6)
+// RelationshipType - Pre-defined relationship types
+model RelationshipType {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  category  String? // family, friend, professional, community
+  strength  Float    @default(5)
+  color     String?
+  isDefault Boolean  @default(true)
+  createdAt DateTime @default(now())
 
-  @@index([asin1], map: "idx_merchant_listings_asin1")
-  @@index([created_at], map: "idx_merchant_listings_created_at")
-  @@index([fulfillment_channel], map: "idx_merchant_listings_fulfillment")
-  @@index([seller_sku], map: "idx_merchant_listings_seller_sku")
-  @@index([status], map: "idx_merchant_listings_status")
+  @@index([category])
 }
 
-model get_merchant_listings_data {
-  id                  Int       @id @default(autoincrement())
-  item_name           String?
-  item_description    String?
-  listing_id          String?
-  seller_sku          String?   @unique
-  asin1               String?
-  product_id          String?
-  product_id_type     String?
-  price               Decimal?  @db.Decimal(10, 2)
-  quantity            BigInt?
-  pending_quantity    BigInt?
-  fulfillment_channel String?
-  item_is_marketplace Boolean?
-  image_url           String?
-  open_date           DateTime? @db.Timestamp(6)
-  created_at          DateTime? @default(now()) @db.Timestamp(6)
-  updated_at          DateTime? @default(now()) @db.Timestamp(6)
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model keywords {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  keyword    String
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-}
-
-model libreboard {
-  id          Int      @id @default(autoincrement())
-  date        DateTime @db.Date
-  parent_asin String?  @db.VarChar(255)
-  child_asin  String?  @db.VarChar(255)
-  sku         String?  @db.VarChar(255)
-  sales       Decimal? @db.Decimal(10, 2)
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model orders {
-  id                              Int       @id @default(autoincrement())
-  amazon_order_id                 String    @unique
-  seller_order_id                 String?
-  purchase_date                   DateTime? @db.Timestamp(6)
-  last_update_date                DateTime? @db.Timestamp(6)
-  earliest_ship_date              DateTime? @db.Timestamp(6)
-  latest_ship_date                DateTime? @db.Timestamp(6)
-  order_status                    String?
-  order_type                      String?
-  fulfillment_channel             String?
-  ship_service_level              String?
-  shipment_service_level_category String?
-  sales_channel                   String?
-  marketplace_id                  String?
-  payment_method                  String?
-  payment_method_details          Json?
-  number_of_items_shipped         Int?      @default(0)
-  number_of_items_unshipped       Int?      @default(0)
-  is_prime                        Boolean?  @default(false)
-  is_premium_order                Boolean?  @default(false)
-  is_business_order               Boolean?  @default(false)
-  is_replacement_order            String?
-  is_sold_by_ab                   Boolean?  @default(false)
-  is_ispu                         Boolean?  @default(false)
-  is_access_point_order           Boolean?  @default(false)
-  is_global_express_enabled       Boolean?  @default(false)
-  has_regulated_items             Boolean?  @default(false)
-  created_at                      DateTime? @default(now()) @db.Timestamp(6)
-  updated_at                      DateTime? @default(now()) @db.Timestamp(6)
-
-  @@ignore
-}
-
-model orders_endpoint {
-  id                              Int       @id @default(autoincrement())
-  amazon_order_id                 String?
-  seller_order_id                 String?
-  purchase_date                   DateTime? @db.Timestamp(6)
-  last_update_date                DateTime? @db.Timestamp(6)
-  earliest_ship_date              DateTime? @db.Timestamp(6)
-  latest_ship_date                DateTime? @db.Timestamp(6)
-  latest_delivery_date            DateTime? @db.Timestamp(6)
-  promise_response_due_date       DateTime? @db.Timestamp(6)
-  order_status                    String?
-  order_type                      String?
-  order_channel                   String?
-  fulfillment_channel             String?
-  ship_service_level              String?
-  shipment_service_level_category String?
-  sales_channel                   String?
-  order_total_amount              Decimal?  @db.Decimal(15, 2)
-  number_of_items_shipped         Int?
-  number_of_items_unshipped       Int?
-  payment_method                  String?
-  payment_method_details          String?
-  payment_execution_detail        String?
-  automated_shipping_settings     String?
-  cba_displayable_shipping_label  String?
-  is_prime                        Boolean?
-  is_premium_order                Boolean?
-  is_replacement_order            Boolean?
-  is_business_order               Boolean?
-  is_sold_by_ab                   Boolean?
-  is_iba                          Boolean?
-  is_ispu                         Boolean?
-  is_access_point_order           Boolean?
-  has_regulated_items             Boolean?
-  electronic_invoice_status       String?
-  replaced_order_id               String?
-  marketplace_id                  String?
-  created_at                      DateTime? @default(now()) @db.Timestamp(6)
-  updated_at                      DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([amazon_order_id], map: "idx_amazon_order_id")
-  @@index([fulfillment_channel], map: "idx_fulfillment_channel")
-  @@index([marketplace_id], map: "idx_marketplace_id")
-  @@index([order_status], map: "idx_order_status")
-  @@index([purchase_date], map: "idx_purchase_date")
-  @@index([seller_order_id], map: "idx_seller_order_id")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model position_history {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  asin_id            String?   @db.Uuid
-  keyword_id         String?   @db.Uuid
-  total_position     Int?
-  page_number        Int?
-  checked_at         DateTime? @default(now()) @db.Timestamptz(6)
-  sponsored_position Int?
-  organic_position   Int?
-  is_sponsored       Boolean?  @default(false)
-}
-
-model sales_traffic_by_asin {
-  id                           Int       @id @default(autoincrement())
-  parentasin                   String?
-  childasin                    String?
-  sku                          String?
-  orderedproductsales_amount   Decimal?  @db.Decimal(15, 2)
-  orderedproductsales_currency String?
-  unitsordered                 BigInt?
-  totalorderitems              BigInt?
-  browsersessions              BigInt?
-  mobileappsessions            BigInt?
-  sessions                     BigInt?
-  sessionpercentage            Decimal?  @db.Decimal(6, 2)
-  browsersessionpercentage     Decimal?  @db.Decimal(6, 2)
-  mobileappsessionpercentage   Decimal?  @db.Decimal(6, 2)
-  browserpageviews             BigInt?
-  mobileapppageviews           BigInt?
-  pageviews                    BigInt?
-  pageviewspercentage          Decimal?  @db.Decimal(6, 2)
-  browserpageviewspercentage   Decimal?  @db.Decimal(6, 2)
-  mobileapppageviewspercentage Decimal?  @db.Decimal(6, 2)
-  buyboxpercentage             Decimal?  @db.Decimal(6, 2)
-  unitsessionpercentage        Decimal?  @db.Decimal(6, 2)
-  report_asin_granularity      String?
-  data_start_time              DateTime? @db.Timestamp(6)
-  data_end_time                DateTime? @db.Timestamp(6)
-  marketplace_id               String?
-  created_at                   DateTime? @default(now()) @db.Timestamp(6)
-  updated_at                   DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([childasin], map: "idx_child_asin")
-  @@index([data_start_time, data_end_time], map: "idx_date_range_asin")
-  @@index([marketplace_id], map: "idx_marketplace_asin")
-  @@index([parentasin], map: "idx_parent_asin")
-  @@index([sku], map: "idx_sku")
-}
-
-model sales_traffic_by_date {
-  id                                Int       @id @default(autoincrement())
-  report_date_granularity           String?
-  data_start_time                   DateTime? @db.Timestamp(6)
-  data_end_time                     DateTime? @db.Timestamp(6)
-  marketplace_id                    String?
-  date                              DateTime? @db.Date
-  orderedproductsales_amount        Decimal?  @db.Decimal(15, 2)
-  orderedproductsales_currency      String?
-  shippedproductsales_amount        Decimal?  @db.Decimal(15, 2)
-  shippedproductsales_currency      String?
-  claimsamount_amount               Decimal?  @db.Decimal(15, 2)
-  claimsamount_currency             String?
-  unitsordered                      BigInt?
-  totalorderitems                   BigInt?
-  unitsshipped                      BigInt?
-  ordersshipped                     BigInt?
-  unitsrefunded                     BigInt?
-  claimsgranted                     BigInt?
-  averagesalesperorderitem_amount   Decimal?  @db.Decimal(15, 2)
-  averagesalesperorderitem_currency String?
-  averagesellingprice_amount        Decimal?  @db.Decimal(15, 2)
-  averagesellingprice_currency      String?
-  averageunitsperorderitem          Decimal?  @db.Decimal(10, 2)
-  refundrate                        Decimal?  @db.Decimal(5, 4)
-  browserpageviews                  BigInt?
-  mobileapppageviews                BigInt?
-  pageviews                         BigInt?
-  browsersessions                   BigInt?
-  mobileappsessions                 BigInt?
-  sessions                          BigInt?
-  buyboxpercentage                  Decimal?  @db.Decimal(6, 2)
-  orderitemsessionpercentage        Decimal?  @db.Decimal(6, 2)
-  unitsessionpercentage             Decimal?  @db.Decimal(6, 2)
-  averageoffercount                 Decimal?  @db.Decimal(10, 2)
-  averageparentitems                Decimal?  @db.Decimal(10, 2)
-  feedbackreceived                  BigInt?
-  negativefeedbackreceived          BigInt?
-  receivednegativefeedbackrate      Decimal?  @db.Decimal(5, 4)
-  created_at                        DateTime? @default(now()) @db.Timestamp(6)
-  updated_at                        DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([created_at], map: "idx_sales_traffic_created_at")
-  @@index([date], map: "idx_sales_traffic_date")
-  @@index([data_start_time, data_end_time], map: "idx_sales_traffic_date_range")
-  @@index([report_date_granularity], map: "idx_sales_traffic_granularity")
-  @@index([marketplace_id], map: "idx_sales_traffic_marketplace")
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model settlement {
-  settlement_id               String?   @db.VarChar(255)
-  settlement_start_date       DateTime? @db.Timestamp(6)
-  settlement_end_date         DateTime? @db.Timestamp(6)
-  deposit_date                DateTime? @db.Timestamp(6)
-  total_amount                Decimal?  @db.Decimal(10, 2)
-  currency                    String?   @db.VarChar(10)
-  transaction_type            String?   @db.VarChar(100)
-  order_id                    String?   @db.VarChar(255)
-  merchant_order_id           String?   @db.VarChar(255)
-  adjustment_id               String?   @db.VarChar(255)
-  shipment_id                 String?   @db.VarChar(255)
-  marketplace_name            String?   @db.VarChar(100)
-  amount_type                 String?   @db.VarChar(100)
-  amount_description          String?
-  amount                      Decimal?  @db.Decimal(10, 2)
-  fulfillment_id              String?   @db.VarChar(255)
-  posted_date                 DateTime? @db.Date
-  posted_date_time            DateTime? @db.Timestamp(6)
-  order_item_code             String?   @db.VarChar(255)
-  merchant_order_item_id      String?   @db.VarChar(255)
-  merchant_adjustment_item_id String?   @db.VarChar(255)
-  sku                         String?   @db.VarChar(255)
-  quantity_purchased          Int?
-  promotion_id                String?   @db.VarChar(255)
-
-  @@ignore
-}
-
-model financial_events {
-  id                 Int       @id @default(autoincrement())
-  amazon_order_id    String?
-  event_type         String
-  posted_date        DateTime? @db.Timestamp(6)
-  seller_sku         String?
-  order_item_id      String?
-  marketplace_id     String?
-  quantity           Int?
-  principal_amount   Decimal?  @db.Decimal(12, 2)
-  principal_currency String?
-  fee_amount         Decimal?  @db.Decimal(12, 2)
-  fee_currency       String?
-  fee_type           String?
-  tax_amount         Decimal?  @db.Decimal(12, 2)
-  tax_currency       String?
-  raw_data           Json?
-  created_at         DateTime? @default(now()) @db.Timestamp(6)
-}
-
-model order_items {
-  id               Int       @id @default(autoincrement())
-  amazon_order_id  String
-  order_item_id    String    @unique
-  asin             String
-  seller_sku       String?
-  title            String?
-  quantity_ordered Int?      @default(0)
-  quantity_shipped Int?      @default(0)
-  is_gift          String?
-  is_transparency  Boolean?  @default(false)
-  product_info     Json?
-  created_at       DateTime? @default(now()) @db.Timestamp(6)
-}
-
-model products {
-  id         Int       @id @default(autoincrement())
-  asin       String    @unique
-  seller_sku String?
-  title      String?
-  cogs       Decimal?  @default(0) @db.Decimal(12, 2)
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
-}
+// Note: Old Amazon seller tables exist in this database but are not managed by this schema
+// They are kept separate for another project
