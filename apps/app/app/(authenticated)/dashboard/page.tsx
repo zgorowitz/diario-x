@@ -1,17 +1,17 @@
 import { auth } from "@repo/auth/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Header } from "./components/header";
+import { Header } from "../components/header";
 
 const title = "Kuka Inc";
-const description = "My application.";
+const description = "Panel principal.";
 
 export const metadata: Metadata = {
   title,
   description,
 };
 
-const App = async () => {
+const DashboardPage = async () => {
   const { orgId } = await auth();
 
   if (!orgId) {
@@ -33,4 +33,4 @@ const App = async () => {
   );
 };
 
-export default App;
+export default DashboardPage;

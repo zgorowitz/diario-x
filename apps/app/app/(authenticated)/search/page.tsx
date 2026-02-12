@@ -36,7 +36,7 @@ const SearchPage = async ({ searchParams }: SearchPageProperties) => {
   }
 
   if (!q) {
-    redirect("/");
+    redirect("/dashboard");
   }
 
   return (

@@ -73,10 +73,6 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Profit",
-          url: "/profit",
-        },
-        {
           title: "History",
           url: "#",
         },
@@ -208,7 +204,7 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                 )}
               >
                 <OrganizationSwitcher
-                  afterSelectOrganizationUrl="/"
+                  afterSelectOrganizationUrl="/dashboard"
                   hidePersonal
                 />
               </div>

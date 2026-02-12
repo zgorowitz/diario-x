@@ -1,0 +1,174 @@
+.page {
+  --tone-1: #5f7566;
+  --tone-2: #779279;
+  --tone-3: #94af90;
+  --tone-4: #b5cca8;
+  --tone-5: #d7e8c1;
+  --tone-6: #e3ecc9;
+  --tone-7: #edefd1;
+  --tone-8: #f2efd9;
+  --tone-9: #f6efe1;
+  --tone-10: #f8f1e9;
+  --tone-11: #fbf5f2;
+
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top left, var(--tone-5), transparent 45%),
+    linear-gradient(180deg, var(--tone-11) 0%, var(--tone-9) 100%);
+  color: var(--tone-1);
+}
+
+.container {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.loginButton {
+  background: var(--tone-1);
+  color: var(--tone-11);
+}
+
+.loginButton:hover {
+  background: var(--tone-2);
+}
+
+.hero {
+  background: color-mix(in oklab, var(--tone-11) 84%, white);
+  border: 1px solid var(--tone-6);
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.kicker {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--tone-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.hero h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.lead {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--tone-2);
+}
+
+.ctaButton {
+  margin-top: 1.4rem;
+  background: var(--tone-2);
+  color: var(--tone-11);
+}
+
+.ctaButton:hover {
+  background: var(--tone-1);
+}
+
+.tabsSection {
+  margin-top: 1.5rem;
+  border: 1px solid var(--tone-6);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--tone-10) 90%, white);
+  padding: 1rem;
+}
+
+.tabsList {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  background: transparent;
+  height: auto;
+}
+
+.tabTrigger {
+  color: var(--tone-1);
+  background: var(--tone-8);
+  border: 1px solid var(--tone-6);
+}
+
+.tabTrigger[data-state="active"] {
+  background: var(--tone-4);
+  color: var(--tone-1);
+}
+
+.tabPanel {
+  margin-top: 1rem;
+  border: 1px solid var(--tone-6);
+  border-radius: 0.75rem;
+  background: var(--tone-11);
+  padding: 1rem;
+}
+
+.tabPanel h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.tabPanel p {
+  margin: 0;
+  color: var(--tone-2);
+  line-height: 1.5;
+}
+
+.pricingTableWrap {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.pricingTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.pricingTable th,
+.pricingTable td {
+  border: 1px solid var(--tone-6);
+  text-align: left;
+  padding: 0.65rem;
+  font-size: 0.92rem;
+}
+
+.pricingTable th {
+  background: var(--tone-7);
+}
+
+.pricingTable td {
+  color: var(--tone-2);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  .tabsList {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .hero {
+    padding: 2.5rem;
+  }
+}
