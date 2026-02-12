@@ -42,7 +42,11 @@ export const getUsers = async (
   userIds: string[]
 ): Promise<
   | {
-      data: Liveblocks["UserMeta"]["info"][];
+      data: Array<{
+        name: string;
+        picture: string;
+        color: string;
+      }>;
     }
   | {
       error: unknown;
@@ -62,7 +66,7 @@ export const getUsers = async (
       limit: 100,
     });
 
-    const data: Liveblocks["UserMeta"]["info"][] = members.data
+    const data = members.data
       .filter(
         (user) =>
           user.publicUserData?.userId &&
